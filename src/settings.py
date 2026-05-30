@@ -12,6 +12,25 @@ _ENV_PATTERN = re.compile(r"^\$\{([A-Z0-9_]+)\}$")
 _PATH_KEYS = {"raw_data", "processed_data", "report_output"}
 
 
+def _load_dotenv(project_root: Path) -> None:
+    env_path = project_root / ".env"
+    if not env_path.exists():
+        return
+
+    for raw_line in env_path.read_text(encoding="utf-8").splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        key = key.strip()
+        value = value.strip()
+        if not key or key in os.environ:
+            continue
+        if len(value) >= 2 and value[0] == value[-1] and value[0] in {'"', "'"}:
+            value = value[1:-1]
+        os.environ[key] = value
+
+
 def _load_yaml(path: Path) -> dict[str, Any]:
     if not path.exists():
         raise FileNotFoundError(f"config file not found: {path}")
@@ -60,6 +79,7 @@ def load_settings(config_path: str | Path, project_root: Path | None = None) -> 
     config_path = Path(config_path)
     if project_root is None:
         project_root = config_path.resolve().parents[1]
+    _load_dotenv(project_root)
     base_config_path = config_path.parent / "base.yaml"
 
     base_cfg = _load_yaml(base_config_path)

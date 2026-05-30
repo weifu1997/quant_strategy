@@ -56,16 +56,18 @@ data/
 ```bash
 cd /root/project/quant_strategy
 cp .env.example .env
-source .env
 python3 -m venv .venv
 .venv/bin/pip install -r requirements.txt
 ```
 
-当前配置默认从环境变量读取 token：
+当前配置默认从环境变量读取 token。`load_settings()` 会优先使用进程环境变量；如果项目根目录存在 `.env`，会在解析 `${TUSHARE_TOKEN}` 前自动加载，且不会覆盖已导出的同名环境变量。
 
 ```bash
-# .env 中设置 TUSHARE_TOKEN 后，重新 source 即可
-source .env
+# 方式一：写入项目根目录 .env（推荐，本地使用，不入 Git）
+echo 'TUSHARE_TOKEN=your-real-token' > .env
+
+# 方式二：直接导出到 shell
+export TUSHARE_TOKEN='your-real-token'
 ```
 
 ## 运行方式

@@ -52,6 +52,42 @@ class SettingsTests(unittest.TestCase):
             self.assertEqual(settings["paths"]["processed_data"], project_root / "data" / "processed")
             self.assertEqual(settings["paths"]["report_output"], project_root / "data" / "reports")
 
+    def test_load_settings_reads_env_file_from_project_root(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            project_root = Path(tmpdir)
+            config_dir = project_root / "config"
+            config_dir.mkdir(parents=True)
+            (project_root / ".env").write_text("TUSHARE_TOKEN=dotenv-token\n", encoding="utf-8")
+            (config_dir / "base.yaml").write_text(
+                "data_source:\n  token: ${TUSHARE_TOKEN}\n",
+                encoding="utf-8",
+            )
+            env_config = config_dir / "server_ubuntu.yaml"
+            env_config.write_text("runtime:\n  env: server_ubuntu\n", encoding="utf-8")
+
+            with patch.dict(os.environ, {}, clear=True):
+                settings = load_settings(env_config, project_root=project_root)
+
+            self.assertEqual(settings["data_source"]["token"], "dotenv-token")
+
+    def test_load_settings_prefers_process_env_over_env_file(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            project_root = Path(tmpdir)
+            config_dir = project_root / "config"
+            config_dir.mkdir(parents=True)
+            (project_root / ".env").write_text("TUSHARE_TOKEN=dotenv-token\n", encoding="utf-8")
+            (config_dir / "base.yaml").write_text(
+                "data_source:\n  token: ${TUSHARE_TOKEN}\n",
+                encoding="utf-8",
+            )
+            env_config = config_dir / "server_ubuntu.yaml"
+            env_config.write_text("runtime:\n  env: server_ubuntu\n", encoding="utf-8")
+
+            with patch.dict(os.environ, {"TUSHARE_TOKEN": "process-token"}, clear=True):
+                settings = load_settings(env_config, project_root=project_root)
+
+            self.assertEqual(settings["data_source"]["token"], "process-token")
+
     def test_load_settings_raises_when_required_env_var_missing(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             project_root = Path(tmpdir)
