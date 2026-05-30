@@ -55,6 +55,8 @@ data/
 
 ```bash
 cd /root/project/quant_strategy
+cp .env.example .env
+source .env
 python3 -m venv .venv
 .venv/bin/pip install -r requirements.txt
 ```
@@ -62,7 +64,8 @@ python3 -m venv .venv
 当前配置默认从环境变量读取 token：
 
 ```bash
-export TUSHARE_TOKEN='your-token'
+# .env 中设置 TUSHARE_TOKEN 后，重新 source 即可
+source .env
 ```
 
 ## 运行方式
