@@ -70,6 +70,18 @@ echo 'TUSHARE_TOKEN=your-real-token' > .env
 export TUSHARE_TOKEN='your-real-token'
 ```
 
+### 排障
+
+如果你已经修改了 `.env`，但请求仍然报 `token invalid`，优先检查当前 shell 是否残留旧的 `TUSHARE_TOKEN`。进程环境变量的优先级高于 `.env`，会覆盖文件里的新值。
+
+```bash
+# 查看当前 shell 是否已有旧值
+echo "$TUSHARE_TOKEN"
+
+# 清掉旧值后，让项目回退到读取 .env
+unset TUSHARE_TOKEN
+```
+
 ## 运行方式
 
 ### 1. 单票抓取
