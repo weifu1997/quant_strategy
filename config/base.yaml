@@ -1,0 +1,60 @@
+project:
+  name: quant_strategy
+  version: "0.1.0"
+
+data_source:
+  provider: tushare_http
+  http_url: "http://111.170.140.159:8020/"
+  token: ${TUSHARE_TOKEN}
+  component_index: "000300.SH"
+  start_date: "2018-01-01"
+  end_date: null
+
+strategy:
+  name: top_momentum_monthly
+  universe: "csi300"
+  benchmark_index: "000300.SH"
+  rebalance: "monthly"
+  signal_on: "last_trading_day"
+  topk: 20
+  min_amount_ma20: 50000000
+  require_close_above_ma20: true
+
+backtest:
+  initial_capital: 1000000
+  commission_bps: 3
+  slippage_bps: 5
+  benchmark: "000300.SH"
+
+paths:
+  raw_data: "data/raw"
+  processed_data: "data/processed"
+  report_output: "data/reports"
+
+factors:
+  momentum:
+    periods: [5, 20, 60]
+  trend:
+    ma_periods: [20, 60]
+  liquidity:
+    ma_period: 20
+
+alpha158:
+  enabled: false
+  mode: subset
+  factor_subset:
+    - ret_5
+    - ret_10
+    - ret_20
+    - ret_60
+    - ma_bias_20
+    - ma_bias_60
+    - std_20
+    - amount_ratio_20
+    - volume_ratio_20
+    - corr_close_volume_20
+
+evaluation:
+  ic_window: 20
+  rankic_window: 20
+  group_count: 10
