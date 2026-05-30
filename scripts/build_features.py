@@ -38,9 +38,12 @@ def main() -> int:
     settings = load_settings(args.config, project_root=project_root)
     processed_root = settings["paths"]["processed_data"]
     daily_root = processed_root / "daily"
+    raw_daily_root = settings["paths"]["raw_data"]
     factor_root = processed_root / "factors" / "base"
 
     daily_df = load_daily(daily_root, start_date=args.start_date, end_date=args.end_date)
+    if daily_df.empty:
+        daily_df = load_daily(raw_daily_root, start_date=args.start_date, end_date=args.end_date)
     factor_df = build_base_factors(daily_df)
     written = save_factor_partitions(factor_df, factor_root)
 
